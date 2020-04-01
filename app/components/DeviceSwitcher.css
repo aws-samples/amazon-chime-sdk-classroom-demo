@@ -1,0 +1,71 @@
+/*!
+ * Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.deviceList {
+  padding: 0.5rem;
+}
+
+.control {
+  background-color: transparent;
+  cursor: pointer;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: none;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+  padding: 0.5rem;
+}
+
+.control:hover {
+  background-color: var(--color_mine_shaft_light);
+}
+
+.placeholder {
+  color: var(--color_alto);
+}
+
+.arrow {
+  border-color: var(--color_alto) transparent transparent;
+  border-width: 0.3rem 0.3rem 0;
+  margin-top: 2px;
+  margin-right: 0.25rem;
+}
+
+.dropdown[class~='is-open'] .arrow {
+  border-color: var(--color_alto) transparent transparent !important;
+  border-width: 0.3rem 0.3rem 0 !important;
+}
+
+.menu {
+  margin: 0;
+  padding: 0.5rem;
+  color: var(--color_alto);
+  background-color: var(--color_cod_gray_medium);
+  box-shadow: 0 0.25rem 0.5rem var(--color_black_low_opacity);
+  overflow: hidden;
+  font-size: 0.9rem;
+  border: none;
+  max-height: none;
+  border-radius: 0.25rem;
+}
+
+.menu *[class~='Dropdown-option'] {
+  color: var(--color_silver_chalice);
+  border-radius: 0.25rem;
+}
+
+.menu *[class~='Dropdown-option']:hover {
+  background-color: var(--color_cod_gray_light);
+}
+
+.menu *[class~='is-selected'] {
+  background-color: transparent;
+  color: var(--color_alabaster);
+}
+
+.menu *[class~='is-selected']:hover {
+  background-color: var(--color_cod_gray_light);
+}
