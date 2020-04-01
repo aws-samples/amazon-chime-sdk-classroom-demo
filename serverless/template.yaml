@@ -1,0 +1,409 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Amazon Chime SDK Meeting Demo
+Parameters:
+  UseEventBridge:
+    Description: Use EventBridge to process server side notifications
+    Default: false
+    Type: String
+    AllowedValues: [true, false]
+Conditions:
+  ShouldUseEventBridge: !Equals [true, !Ref UseEventBridge]
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    Timeout: 30
+    MemorySize: 128
+    Environment:
+      Variables:
+        MEETINGS_TABLE_NAME: !Ref Meetings
+        ATTENDEES_TABLE_NAME: !Ref Attendees
+        SQS_QUEUE_ARN: !GetAtt MeetingNotificationsQueue.Arn
+        CONNECTIONS_TABLE_NAME: !Ref ConnectionsTable
+        MESSAGING_WSS_URL: !Join ['', ['wss://', !Ref WebSocketMessagingApi, '.execute-api.', !Ref 'AWS::Region','.amazonaws.com/Prod']]
+Resources:
+  ChimeMeetingsAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ChimeMeetingsAccess
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'chime:CreateMeeting'
+              - 'chime:DeleteMeeting'
+              - 'chime:GetMeeting'
+              - 'chime:ListMeetings'
+              - 'chime:BatchCreateAttendee'
+              - 'chime:CreateAttendee'
+              - 'chime:DeleteAttendee'
+              - 'chime:GetAttendee'
+              - 'chime:ListAttendees'
+            Resource: '*'
+      Roles:
+        - Ref: ChimeSdkJoinLambdaRole
+        - Ref: ChimeSdkAttendeeLambdaRole
+        - Ref: ChimeSdkEndLambdaRole
+        - Ref: ChimeSdkCreateMeetingLambdaRole
+        - Ref: AuthorizeFunctionRole
+  Meetings:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "Title"
+          AttributeType: "S"
+        - AttributeName: "Passcode"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "Title"
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      GlobalSecondaryIndexes:
+        - IndexName: "Passcode"
+          KeySchema:
+            - AttributeName: "Passcode"
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+      TimeToLiveSpecification:
+        AttributeName: "TTL"
+        Enabled: true
+  Attendees:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "AttendeeId"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "AttendeeId"
+          KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+  MeetingNotificationsQueue:
+    Type: AWS::SQS::Queue
+  ChimeSdkIndexLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs10.x
+      CodeUri: src/
+      Events:
+        Api1:
+          Type: Api
+          Properties:
+            Path: /
+            Method: GET
+  ChimeSdkCreateMeetingLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: handlers.createMeeting
+      CodeUri: src/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Meetings
+      Environment:
+        Variables:
+          USE_EVENT_BRIDGE: !Ref UseEventBridge
+      Events:
+        Api1:
+          Type: Api
+          Properties:
+            Path: /meeting
+            Method: POST
+  ChimeSdkJoinLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: handlers.join
+      CodeUri: src/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Meetings
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Attendees
+      Environment:
+        Variables:
+          USE_EVENT_BRIDGE: !Ref UseEventBridge
+      Events:
+        Api1:
+          Type: Api
+          Properties:
+            Path: /join
+            Method: POST
+  ChimeSdkEndLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: handlers.end
+      CodeUri: src/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Meetings
+      Events:
+        Api1:
+          Type: Api
+          Properties:
+            Path: /end
+            Method: POST
+  ChimeSdkAttendeeLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: handlers.attendee
+      CodeUri: src/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Meetings
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Attendees
+      Events:
+        Api1:
+          Type: Api
+          Properties:
+            Path: /attendee
+            Method: GET
+  ChimeSQSQueueLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: notification_handlers.sqs_handler
+      CodeUri: src/
+      Events:
+        MeetingNotificaionsEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt MeetingNotificationsQueue.Arn
+            BatchSize: 10
+  ChimeEventBridgeLambda:
+    Type: AWS::Serverless::Function
+    Condition: ShouldUseEventBridge
+    Properties:
+      Handler: notification_handlers.event_bridge_handler
+      CodeUri: src/
+      Events:
+        ChimeEventBridgeEvent:
+          Type: CloudWatchEvent
+          Properties:
+            Pattern:
+              source:
+                - aws.chime
+              detail-type:
+                - "Chime Meeting State Change"
+  ChimeNotificationsQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - sqs:SendMessage
+              - sqs:GetQueueUrl
+            Principal:
+              Service:
+                - chime.amazonaws.com
+            Resource: !GetAtt MeetingNotificationsQueue.Arn
+      Queues:
+        - Ref: MeetingNotificationsQueue
+
+# Messaging API
+
+  WebSocketMessagingApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub '${AWS::StackName}-MessagingApi'
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: "$request.body.message"
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WebSocketMessagingApi
+      RouteKey: $connect
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref Authorizer
+      OperationName: ConnectRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref ConnectIntegration
+  ConnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WebSocketMessagingApi
+      Description: Connect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnConnectFunction.Arn}/invocations
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WebSocketMessagingApi
+      RouteKey: $disconnect
+      AuthorizationType: NONE
+      OperationName: DisconnectRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref DisconnectIntegration
+  DisconnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WebSocketMessagingApi
+      Description: Disconnect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnDisconnectFunction.Arn}/invocations
+  SendRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WebSocketMessagingApi
+      RouteKey: sendmessage
+      AuthorizationType: NONE
+      OperationName: SendRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref SendIntegration
+  SendIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WebSocketMessagingApi
+      Description: Send Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SendMessageFunction.Arn}/invocations
+  Deployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+    - ConnectRoute
+    - SendRoute
+    - DisconnectRoute
+    Properties:
+      ApiId: !Ref WebSocketMessagingApi
+  Stage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: Prod
+      Description: Prod Stage
+      DeploymentId: !Ref Deployment
+      ApiId: !Ref WebSocketMessagingApi
+  ConnectionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: MeetingId
+        AttributeType: S
+      - AttributeName: AttendeeId
+        AttributeType: S
+      KeySchema:
+      - AttributeName: MeetingId
+        KeyType: HASH
+      - AttributeName: AttendeeId
+        KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: True
+      TimeToLiveSpecification:
+        AttributeName: TTL
+        Enabled: true
+  OnConnectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: messaging.onconnect
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Ref ConnectionsTable
+  OnConnectPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - WebSocketMessagingApi
+      - OnConnectFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref OnConnectFunction
+      Principal: apigateway.amazonaws.com
+  AuthorizeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: messaging.authorize
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Ref ConnectionsTable
+  AuthorizePermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - WebSocketMessagingApi
+      - AuthorizeFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref AuthorizeFunction
+      Principal: apigateway.amazonaws.com
+  Authorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      Name: LambdaAuthorizer
+      ApiId: !Ref WebSocketMessagingApi
+      AuthorizerType: REQUEST
+      AuthorizerUri:
+        Fn::Sub:
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthorizeFunction.Arn}/invocations
+      IdentitySource:
+        - route.request.querystring.MeetingId
+        - route.request.querystring.AttendeeId
+        - route.request.querystring.JoinToken
+  OnDisconnectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: messaging.ondisconnect
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Ref ConnectionsTable
+  OnDisconnectPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - WebSocketMessagingApi
+      - OnDisconnectFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref OnDisconnectFunction
+      Principal: apigateway.amazonaws.com
+  SendMessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: messaging.sendmessage
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Ref ConnectionsTable
+      - Statement:
+        - Effect: Allow
+          Action:
+          - 'execute-api:ManageConnections'
+          Resource:
+          - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebSocketMessagingApi}/*'
+  SendMessagePermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - WebSocketMessagingApi
+      - SendMessageFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref SendMessageFunction
+      Principal: apigateway.amazonaws.com
+
+Outputs:
+  ApiURL:
+    Description: "API endpoint URL for Prod environment"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  MessagingWebSocketURI:
+    Description: "The Messaging WSS Protocol URI to connect to"
+    Value: !Join ['', ['wss://',!Ref WebSocketMessagingApi, '.execute-api.', !Ref 'AWS::Region','.amazonaws.com/', !Ref 'Stage']]

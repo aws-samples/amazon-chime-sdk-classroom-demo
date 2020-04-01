@@ -1,0 +1,17 @@
+{
+  "name": "amazon-chime-sdk-classroom-demo",
+  "productName": "MyClassroom",
+  "version": "1.0.0",
+  "description": "Demonstrates how to use the Amazon Chime SDK to build an online classroom with Electron and React",
+  "main": "./main.prod.js",
+  "author": {
+    "name": "Amazon Chime SDK Team",
+    "url": "https://github.com/aws-samples/amazon-chime-sdk-classroom-demo"
+  },
+  "scripts": {
+    "electron-rebuild": "node -r ../internals/scripts/BabelRegister.js ../internals/scripts/ElectronRebuild.js",
+    "postinstall": "yarn electron-rebuild"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {}
+}
