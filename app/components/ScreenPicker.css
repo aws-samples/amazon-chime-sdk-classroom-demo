@@ -1,0 +1,183 @@
+/*!
+ * Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.screenPicker {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  width: var(--screen_picker_width);
+  height: var(--screen_picker_height);
+  background: var(--color_mine_shaft_light);
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.top {
+  flex: 0 0 auto;
+}
+
+.header {
+  font-size: 1.5rem;
+  font-weight: 400;
+  padding: 1rem 1.5rem;
+  margin: 0;
+}
+
+.tabs {
+  display: flex;
+  padding: 0 1.5rem;
+}
+
+.screenTab,
+.windowTab {
+  border: none;
+  border-bottom: 0.125rem solid transparent;
+  user-select: none;
+  cursor: pointer;
+  transition: color 0.1s;
+  padding: 0 0 0.25rem;
+  color: var(--color_silver_chalice);
+  background: transparent;
+  outline: none;
+  font-size: 1rem;
+}
+
+.screenTab {
+  margin-left: 1rem;
+}
+
+.screenTab.selected,
+.windowTab.selected {
+  color: var(--color_alabaster);
+  border-bottom: 0.125rem solid var(--color_alabaster);
+}
+
+.screenTab:hover,
+.windowTab:hover {
+  color: var(--color_alabaster);
+}
+
+.middle {
+  flex: 1 1 auto;
+  overflow-y: scroll;
+  background: var(--color_mine_shaft_medium);
+  padding: 1.5rem;
+  display: grid;
+  grid-column-gap: 4rem;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: minmax(min-content, max-content);
+}
+
+.middle.loading {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.noScreen {
+  color: var(--color_silver_chalice);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.source {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  outline: none;
+}
+
+.source:hover {
+  box-shadow: 0 0 0 0.5rem var(--color_silver_chalice);
+}
+
+.source.selected {
+  box-shadow: 0 0 0 0.5rem var(--color_alabaster) !important;
+}
+
+.image {
+  flex-direction: column;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  position: relative;
+  height: 12rem;
+}
+
+.image img {
+  max-height: 100%;
+  max-width: 100%;
+  margin: auto;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+}
+
+.caption {
+  width: 100%;
+  white-space: nowrap;
+  overflow: auto;
+  text-overflow: ellipsis;
+  text-align: center;
+  font-size: 1rem;
+  padding: 1rem 1rem 0;
+}
+
+.bottom {
+  display: flex;
+  flex: 0 0 5rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.buttons {
+  display: flex;
+  margin-left: auto;
+  align-items: center;
+  padding: 0 1.5rem;
+}
+
+.cancelButton,
+.shareButton {
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  user-select: none;
+  width: 6rem;
+  border: 1px solid var(--color_alabaster);
+}
+
+.shareButton {
+  color: var(--color_mine_shaft_light);
+  background: var(--color_alabaster);
+  opacity: 0.25;
+  margin-left: 1rem;
+}
+
+.shareButton.enabled {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.cancelButton {
+  color: var(--color_alabaster);
+  border-color: var(--color_alabaster);
+  background: transparent;
+  cursor: pointer;
+}
+
+.cancelButton:hover,
+.shareButton.enabled:hover {
+  opacity: 0.8;
+}

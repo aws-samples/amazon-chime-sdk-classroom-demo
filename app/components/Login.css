@@ -1,0 +1,70 @@
+/*!
+ * Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.content {
+  color: var(--color_mine_shaft_dark);
+  width: var(--screen_picker_width);
+  background-color: var(--color_alabaster);
+  border-radius: 0.25rem;
+  padding: 5rem 5rem 6rem;
+}
+
+.title {
+  margin: 0 0 1rem;
+}
+
+.selection {
+  display: flex;
+}
+
+.selection div {
+  width: 50%;
+}
+
+.selection div + div {
+  margin-left: 3rem;
+}
+
+.selection h2 {
+  font-size: 1.4rem;
+}
+
+.selection ul {
+  padding-left: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.selection ul ul {
+  padding-top: 0.5rem;
+}
+
+.selection li + li {
+  margin-top: 0.5rem;
+}
+
+.selection button {
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.75rem 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--color_alabaster);
+  background: var(--color_mine_shaft_light);
+  cursor: pointer;
+  transition: background-color 0.15s;
+  user-select: none;
+  margin-top: 0.75rem;
+}
+
+.selection button:hover {
+  background: var(--color_cod_gray_medium);
+}

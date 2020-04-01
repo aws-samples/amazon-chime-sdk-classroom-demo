@@ -1,0 +1,16 @@
+/*!
+ * Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.tooltip[class~='rc-tooltip-placement-top'] div[class~='rc-tooltip-arrow'],
+.tooltip[class~='rc-tooltip-placement-topLeft'] div[class~='rc-tooltip-arrow'],
+.tooltip[class~='rc-tooltip-placement-topRight']
+  div[class~='rc-tooltip-arrow'] {
+  border-top-color: var(--color_cod_gray_medium);
+}
+
+.tooltip *[class~='rc-tooltip-inner'] {
+  background-color: var(--color_cod_gray_medium);
+  font-size: 1rem;
+}

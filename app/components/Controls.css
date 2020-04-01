@@ -1,0 +1,90 @@
+/*!
+ * Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.controls {
+  display: block;
+  position: relative;
+}
+
+.controls.screenShareMode {
+  width: calc(var(--local_video_container_height) - 0.5rem);
+  height: calc(var(--local_video_container_height) - 0.5rem);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.15s;
+}
+
+.controls.screenShareMode:hover {
+  opacity: 1 !important;
+}
+
+.controls.screenShareMode.videoEnabled {
+  opacity: 0;
+}
+
+.controls.screenShareMode.audioMuted {
+  opacity: 1;
+}
+
+.micMuted {
+  display: none;
+  z-index: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color_black_medium_opacity);
+  text-align: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  padding: 1rem;
+}
+
+.controls.screenShareMode.audioMuted.videoEnabled .micMuted {
+  display: flex;
+}
+
+.controls.screenShareMode.audioMuted.videoEnabled .muteButton {
+  background-color: var(--color_thunderbird);
+}
+
+.controls button {
+  width: 2.75rem;
+  height: 2.75rem;
+  text-align: center;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  color: var(--color_alabaster);
+  background: var(--color_tundora);
+  cursor: pointer;
+  transition: opacity 0.15s;
+  outline: none;
+  z-index: 1;
+}
+
+.controls button.enabled {
+  color: var(--color_tundora);
+  background: var(--color_alabaster);
+}
+
+.controls button:hover {
+  opacity: 0.8;
+}
+
+.controls.roomMode button + button {
+  margin-left: 1rem;
+}
+
+.controls.screenShareMode button + button {
+  margin-left: 0.5rem;
+}
+
+.endButton {
+  background: var(--color_thunderbird) !important;
+}
