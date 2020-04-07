@@ -2,9 +2,16 @@
 
 This demo shows how to use the Amazon Chime SDK to build an online classroom in Electron and React.
 
+<img src="resources/readme-hero.jpg" width="640" alt="Amazon Chime SDK Classroom Demo">
+
 ## Installation
 
 ### Option 1: Deploy via AWS Cloud9
+
+#### Prerequisites
+
+- Log into your AWS account with an IAM role that has the **AdministratorAccess** policy.
+- Use the **us-east-1 (N. Virginia)** region of your AWS account.
 
 #### Create an AWS Cloud9 environment
 
@@ -20,10 +27,8 @@ This demo shows how to use the Amazon Chime SDK to build an online classroom in 
 Once the Cloud9 environment starts, run the following commands in the Terminal pane at the bottom of the window to download the application repository:
 
 ```
-git clone https://github.com/aws/amazon-chime-sdk-js.git
-cd amazon-chime-sdk-js
-git checkout edu-demo
-cd demos/edu-demo
+git clone https://github.com/aws-samples/amazon-chime-sdk-classroom-demo.git
+cd amazon-chime-sdk-classroom-demo
 ```
 
 Now in the same Terminal pane, run the following command to deploy, package, and create a distribution for your application. Note this will take about 15 minutes.
