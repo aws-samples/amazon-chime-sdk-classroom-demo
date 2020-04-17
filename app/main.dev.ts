@@ -120,7 +120,9 @@ const createWindow = async () => {
     mainWindow.resizable = false;
     mainWindow.minimizable = false;
     mainWindow.maximizable = false;
-    mainWindow.setWindowButtonVisibility(false);
+    if (typeof mainWindow.setWindowButtonVisibility === 'function') {
+      mainWindow.setWindowButtonVisibility(false);
+    }
     // In macOS Electron, long titles may be truncated.
     mainWindow.setTitle('MyClassroom');
 
@@ -141,7 +143,9 @@ const createWindow = async () => {
     mainWindow.resizable = true;
     mainWindow.minimizable = true;
     mainWindow.maximizable = true;
-    mainWindow.setWindowButtonVisibility(true);
+    if (typeof mainWindow.setWindowButtonVisibility === 'function') {
+      mainWindow.setWindowButtonVisibility(true);
+    }
     mainWindow.setTitle('MyClassroom');
 
     event.reply('chime-disable-screen-share-mode-ack');
