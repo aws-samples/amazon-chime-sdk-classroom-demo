@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { spawnSync } = require('child_process');
+const spawnSync = require('cross-spawn').sync;
 const fs = require('fs');
 const path = require('path');
 
@@ -198,7 +198,7 @@ ${cssStyle}
 <article class="markdown-body">
 <h3>Download ${appName}</h3>
 <ul>
-<li><a href="https://${bucket}-releases.s3.amazonaws.com/mac/${appName}.zip">${appName} for macOS (ZIP)</a></li>
+<li><a href="https://${bucket}-releases.s3.amazonaws.com/mac/${appName}.dmg">${appName} for macOS (DMG)</a></li>
 <li><a href="https://${bucket}-releases.s3.amazonaws.com/win/${appName}.zip">${appName} for Windows (ZIP)</a></li>
 </ul>
 </article>
@@ -312,8 +312,8 @@ export default function getMessagingWssUrl() {return '${messagingWssUrl}';}
     'cp',
     '--acl',
     'public-read',
-    `release/${appName}.zip`,
-    `s3://${bucket}-releases/mac/${appName}.zip`
+    `release/${appName}.dmg`,
+    `s3://${bucket}-releases/mac/${appName}.dmg`
   ]);
 
   console.log('... uploading Windows installer (this may take a while) ...');
