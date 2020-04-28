@@ -126,6 +126,10 @@ function parseArgs() {
 }
 
 function spawnOrFail(command, args, options) {
+  options = {
+    ...options,
+    shell: true
+  };
   console.log(`--> ${command} ${args.join(' ')}`);
   const cmd = spawnSync(command, args, options);
   if (cmd.error) {
