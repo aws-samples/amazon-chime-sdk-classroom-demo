@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const spawnSync = require('cross-spawn').sync;
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -126,6 +126,10 @@ function parseArgs() {
 }
 
 function spawnOrFail(command, args, options) {
+  options = {
+    ...options,
+    shell: true
+  };
   console.log(`--> ${command} ${args.join(' ')}`);
   const cmd = spawnSync(command, args, options);
   if (cmd.error) {
