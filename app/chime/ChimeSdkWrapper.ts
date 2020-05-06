@@ -17,6 +17,7 @@ import {
   ReconnectingPromisedWebSocket
 } from 'amazon-chime-sdk-js';
 import { useIntl } from 'react-intl';
+import throttle from 'lodash/throttle';
 
 import DeviceType from '../types/DeviceType';
 import FullDeviceInfoType from '../types/FullDeviceInfoType';
@@ -30,6 +31,8 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
   intl = useIntl();
 
   private static WEB_SOCKET_TIMEOUT_MS = 10000;
+
+  private static ROSTER_THROTTLE_MS = 400;
 
   meetingSession: MeetingSession | null = null;
 
@@ -231,6 +234,7 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
       (presentAttendeeId: string, present: boolean): void => {
         if (!present) {
           delete this.roster[presentAttendeeId];
+          this.publishRosterUpdate.cancel();
           this.publishRosterUpdate();
           return;
         }
@@ -243,6 +247,8 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
             muted: boolean | null,
             signalStrength: number | null
           ) => {
+            let shouldPublishImmediately = false;
+
             const baseAttendeeId = new DefaultModality(attendeeId).base();
             if (baseAttendeeId !== attendeeId) {
               if (
@@ -262,6 +268,7 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
             }
             if (muted !== null) {
               this.roster[attendeeId].muted = muted;
+              shouldPublishImmediately = true;
             }
             if (signalStrength !== null) {
               this.roster[attendeeId].signalStrength = Math.round(
@@ -276,6 +283,11 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
               );
               const json = await response.json();
               this.roster[attendeeId].name = json.AttendeeInfo.Name || '';
+              shouldPublishImmediately = true;
+            }
+
+            if (shouldPublishImmediately) {
+              this.publishRosterUpdate.cancel();
             }
             this.publishRosterUpdate();
           }
@@ -570,12 +582,12 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
     }
   };
 
-  private publishRosterUpdate = () => {
+  private publishRosterUpdate = throttle(() => {
     for (let i = 0; i < this.rosterUpdateCallbacks.length; i += 1) {
       const callback = this.rosterUpdateCallbacks[i];
       callback(this.roster);
     }
-  };
+  }, ChimeSdkWrapper.ROSTER_THROTTLE_MS);
 
   subscribeToMessageUpdate = (callback: (message: MessageType) => void) => {
     this.messageUpdateCallbacks.push(callback);

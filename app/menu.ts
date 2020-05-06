@@ -13,6 +13,8 @@ import {
 export default class MenuBuilder {
   mainWindow: BrowserWindow;
 
+  isCpuUsageVisible = false;
+
   constructor(mainWindow: BrowserWindow) {
     this.mainWindow = mainWindow;
   }
@@ -124,6 +126,17 @@ export default class MenuBuilder {
           click: () => {
             this.mainWindow.webContents.toggleDevTools();
           }
+        },
+        {
+          label: 'Toggle CPU Usage',
+          accelerator: 'Alt+Command+C',
+          click: () => {
+            this.mainWindow.webContents.send(
+              'chime-toggle-cpu-usage',
+              !this.isCpuUsageVisible
+            );
+            this.isCpuUsageVisible = !this.isCpuUsageVisible;
+          }
         }
       ]
     };
@@ -135,6 +148,17 @@ export default class MenuBuilder {
           accelerator: 'Alt+Command+I',
           click: () => {
             this.mainWindow.webContents.toggleDevTools();
+          }
+        },
+        {
+          label: 'Toggle CPU Usage',
+          accelerator: 'Alt+Command+C',
+          click: () => {
+            this.mainWindow.webContents.send(
+              'chime-toggle-cpu-usage',
+              !this.isCpuUsageVisible
+            );
+            this.isCpuUsageVisible = !this.isCpuUsageVisible;
           }
         }
       ]

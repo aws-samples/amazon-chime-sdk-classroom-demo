@@ -67,5 +67,7 @@ export default {
 
   'Roster.raiseHandAriaLabel': `Raised hand by {name}`,
 
-  'RemoteVideo.raiseHandAriaLabel': `Raised hand`
+  'RemoteVideo.raiseHandAriaLabel': `Raised hand`,
+
+  'CPUUsage.getting': `Getting CPU usage...`
 };

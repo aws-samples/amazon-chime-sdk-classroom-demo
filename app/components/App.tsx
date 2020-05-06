@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { ReactNode } from 'react';
+import CPUUsage from './CPUUsage';
 
 type Props = {
   children: ReactNode;
@@ -9,5 +10,10 @@ type Props = {
 
 export default function App(props: Props) {
   const { children } = props;
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <CPUUsage />
+    </>
+  );
 }
