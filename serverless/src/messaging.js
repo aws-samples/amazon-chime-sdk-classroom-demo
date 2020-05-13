@@ -109,12 +109,12 @@ exports.ondisconnect = async event => {
   console.log('ondisconnect event:', JSON.stringify(event, null, 2));
   try {
     await ddb
-      .delete({
+      .deleteItem({
         TableName: process.env.CONNECTIONS_TABLE_NAME,
         Key: {
-          MeetingId: event.requestContext.authorizer.MeetingId,
-          AttendeeId: event.requestContext.authorizer.AttendeeId
-        }
+          MeetingId: { S: event.requestContext.authorizer.MeetingId },
+          AttendeeId: { S: event.requestContext.authorizer.AttendeeId },
+        },
       })
       .promise();
   } catch (err) {
