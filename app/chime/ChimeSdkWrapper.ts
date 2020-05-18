@@ -247,18 +247,20 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
             muted: boolean | null,
             signalStrength: number | null
           ) => {
-            let shouldPublishImmediately = false;
-
             const baseAttendeeId = new DefaultModality(attendeeId).base();
             if (baseAttendeeId !== attendeeId) {
-              if (
-                baseAttendeeId !==
-                this.meetingSession?.configuration.credentials?.attendeeId
-              ) {
-                // TODO: stop my content share
-              }
+              // Don't include the content attendee in the roster.
+              //
+              // When you or other attendees share content (a screen capture, a video file,
+              // or any other MediaStream object), the content attendee (attendee-id#content) joins the session and
+              // shares content as if a regular attendee shares a video.
+              //
+              // For example, your attendee ID is "my-id". When you call meetingSession.audioVideo.startContentShare,
+              // the content attendee "my-id#content" will join the session and share your content.
               return;
             }
+
+            let shouldPublishImmediately = false;
 
             if (!this.roster[attendeeId]) {
               this.roster[attendeeId] = { name: '' };
@@ -268,7 +270,6 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
             }
             if (muted !== null) {
               this.roster[attendeeId].muted = muted;
-              shouldPublishImmediately = true;
             }
             if (signalStrength !== null) {
               this.roster[attendeeId].signalStrength = Math.round(

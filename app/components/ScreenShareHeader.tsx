@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import classNames from 'classnames/bind';
-import React, { useContext } from 'react';
+import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
-import getRosterContext from '../context/getRosterContext';
+import useRoster from '../hooks/useRoster';
 import styles from './ScreenShareHeader.css';
 
 const cx = classNames.bind(styles);
@@ -15,7 +15,7 @@ type Props = {
 };
 
 export default function ScreenShareHeader(props: Props) {
-  const roster = useContext(getRosterContext());
+  const roster = useRoster();
   const { onClickStopButton } = props;
   return (
     <div className={cx('screenShareHeader')}>

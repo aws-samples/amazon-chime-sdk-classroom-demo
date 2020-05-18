@@ -6,23 +6,18 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 
 import ViewMode from '../enums/ViewMode';
-import RosterAttendeeType from '../types/RosterAttendeeType';
+import Size from '../enums/Size';
+import VideoNameplate from './VideoNameplate';
 import styles from './RemoteVideo.css';
 
 const cx = classNames.bind(styles);
-
-export enum Size {
-  Small,
-  Medium,
-  Large
-}
 
 type Props = {
   viewMode: ViewMode;
   enabled: boolean;
   videoElementRef: (instance: HTMLVideoElement | null) => void;
   size: Size;
-  rosterAttendee?: RosterAttendeeType;
+  attendeeId: string | null;
   raisedHand?: boolean;
   isContentShareEnabled: boolean;
 };
@@ -34,38 +29,25 @@ export default function RemoteVideo(props: Props) {
     enabled,
     videoElementRef,
     size = Size.Large,
-    rosterAttendee = {},
+    attendeeId,
     raisedHand,
     isContentShareEnabled
   } = props;
-  const { name, muted } = rosterAttendee;
   return (
     <div
       className={cx('remoteVideo', {
         roomMode: viewMode === ViewMode.Room,
         screenShareMode: viewMode === ViewMode.ScreenShare,
-        enabled,
-        small: size === Size.Small,
-        medium: size === Size.Medium,
-        large: size === Size.Large,
-        isContentShareEnabled
+        enabled
       })}
     >
       <video muted ref={videoElementRef} className={styles.video} />
-      {name && typeof muted === 'boolean' && (
-        <div className={cx('nameplate')}>
-          {name && <div className={cx('name')}>{name}</div>}
-          {typeof muted === 'boolean' && (
-            <div className={cx('muted')}>
-              {muted ? (
-                <i className="fas fa-microphone-slash" />
-              ) : (
-                <i className="fas fa-microphone" />
-              )}
-            </div>
-          )}
-        </div>
-      )}
+      <VideoNameplate
+        viewMode={viewMode}
+        size={size}
+        isContentShareEnabled={isContentShareEnabled}
+        attendeeId={attendeeId}
+      />
       {raisedHand && (
         <div className={cx('raisedHand')}>
           <span

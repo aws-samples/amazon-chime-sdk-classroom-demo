@@ -8,11 +8,10 @@ import { FormattedMessage } from 'react-intl';
 
 import ChimeSdkWrapper from '../chime/ChimeSdkWrapper';
 import getChimeContext from '../context/getChimeContext';
-import getRosterContext from '../context/getRosterContext';
 import ViewMode from '../enums/ViewMode';
+import Size from '../enums/Size';
 import useRaisedHandAttendees from '../hooks/useRaisedHandAttendees';
-import RosterAttendeeType from '../types/RosterAttendeeType';
-import RemoteVideo, { Size } from './RemoteVideo';
+import RemoteVideo from './RemoteVideo';
 import styles from './RemoteVideoGroup.css';
 
 const cx = classNames.bind(styles);
@@ -26,7 +25,6 @@ type Props = {
 export default function RemoteVideoGroup(props: Props) {
   const { viewMode, isContentShareEnabled } = props;
   const chime: ChimeSdkWrapper | null = useContext(getChimeContext());
-  const roster = useContext(getRosterContext());
   const [visibleIndices, setVisibleIndices] = useState<{
     [index: string]: { boundAttendeeId: string };
   }>({});
@@ -126,14 +124,10 @@ export default function RemoteVideoGroup(props: Props) {
       )}
       {Array.from(Array(MAX_REMOTE_VIDEOS).keys()).map((key, index) => {
         const visibleIndex = visibleIndices[index];
-        let rosterAttendee: RosterAttendeeType = {};
-        let raisedHand = false;
-        if (visibleIndex && roster) {
-          rosterAttendee = roster[visibleIndex.boundAttendeeId];
-          if (raisedHandAttendees) {
-            raisedHand = raisedHandAttendees.has(visibleIndex.boundAttendeeId);
-          }
-        }
+        const attendeeId = visibleIndex ? visibleIndex.boundAttendeeId : null;
+        const raisedHand = raisedHandAttendees
+          ? raisedHandAttendees.has(attendeeId)
+          : false;
         return (
           <RemoteVideo
             key={key}
@@ -145,7 +139,7 @@ export default function RemoteVideoGroup(props: Props) {
               }
             }, [])}
             size={getSize()}
-            rosterAttendee={rosterAttendee}
+            attendeeId={attendeeId}
             raisedHand={raisedHand}
             isContentShareEnabled={isContentShareEnabled}
           />

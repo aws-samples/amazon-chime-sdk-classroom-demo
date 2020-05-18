@@ -8,7 +8,7 @@ import { useIntl } from 'react-intl';
 
 import ChimeSdkWrapper from '../chime/ChimeSdkWrapper';
 import getChimeContext from '../context/getChimeContext';
-import getRosterContext from '../context/getRosterContext';
+import useRoster from '../hooks/useRoster';
 import useRaisedHandAttendees from '../hooks/useRaisedHandAttendees';
 import RosterAttendeeType from '../types/RosterAttendeeType';
 import styles from './Roster.css';
@@ -17,7 +17,7 @@ const cx = classNames.bind(styles);
 
 export default function Roster() {
   const chime: ChimeSdkWrapper | null = useContext(getChimeContext());
-  const roster = useContext(getRosterContext());
+  const roster = useRoster();
   const [videoAttendees, setVideoAttendees] = useState(new Set());
   const raisedHandAttendees = useRaisedHandAttendees();
   const intl = useIntl();
@@ -60,7 +60,9 @@ export default function Roster() {
 
   let attendeeIds;
   if (chime?.meetingSession && roster) {
-    attendeeIds = Object.keys(roster);
+    attendeeIds = Object.keys(roster).filter(attendeeId => {
+      return !!roster[attendeeId].name;
+    });
   }
 
   return (

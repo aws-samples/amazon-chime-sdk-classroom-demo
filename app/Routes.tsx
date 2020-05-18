@@ -12,7 +12,6 @@ import Login from './components/Login';
 import routes from './constants/routes.json';
 import getUIStateContext from './context/getUIStateContext';
 import MeetingStatusProvider from './providers/MeetingStatusProvider';
-import RosterProvider from './providers/RosterProvider';
 
 export default function Routes() {
   const [state] = useContext(getUIStateContext());
@@ -36,9 +35,7 @@ export default function Routes() {
       <Switch>
         <PrivateRoute path={routes.CLASSROOM}>
           <MeetingStatusProvider>
-            <RosterProvider>
-              <Classroom />
-            </RosterProvider>
+            <Classroom />
           </MeetingStatusProvider>
         </PrivateRoute>
         <PrivateRoute path={routes.CREATE_OR_JOIN}>
