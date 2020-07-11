@@ -114,7 +114,7 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
   lookupClosestChimeRegion = async (): Promise<RegionType> => {
     let region: string;
     try {
-      const response = await fetch(`https://l.chime.aws`, {
+      const response = await fetch(`https://nearest-media-region.l.chime.aws`, {
         method: 'GET'
       });
       const json = await response.json();
