@@ -13,6 +13,7 @@ import Size from '../enums/Size';
 import useRaisedHandAttendees from '../hooks/useRaisedHandAttendees';
 import RemoteVideo from './RemoteVideo';
 import styles from './RemoteVideoGroup.css';
+import useRoster from '../hooks/useRoster';
 
 const cx = classNames.bind(styles);
 const MAX_REMOTE_VIDEOS = 16;
@@ -29,6 +30,7 @@ export default function RemoteVideoGroup(props: Props) {
     [index: string]: { boundAttendeeId: string };
   }>({});
   const raisedHandAttendees = useRaisedHandAttendees();
+  const roster = useRoster();
   const videoElements: HTMLVideoElement[] = [];
   const tiles: { [index: number]: number } = {};
 
@@ -128,6 +130,9 @@ export default function RemoteVideoGroup(props: Props) {
         const raisedHand = raisedHandAttendees
           ? raisedHandAttendees.has(attendeeId)
           : false;
+        const activeSpeaker = visibleIndex
+          ? roster[visibleIndex.boundAttendeeId]?.active
+          : false;
         return (
           <RemoteVideo
             key={key}
@@ -141,6 +146,7 @@ export default function RemoteVideoGroup(props: Props) {
             size={getSize()}
             attendeeId={attendeeId}
             raisedHand={raisedHand}
+            activeSpeaker={activeSpeaker}
             isContentShareEnabled={isContentShareEnabled}
           />
         );

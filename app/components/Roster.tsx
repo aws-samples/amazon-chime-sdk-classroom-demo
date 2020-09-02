@@ -100,7 +100,17 @@ export default function Roster() {
                   {rosterAttendee.muted ? (
                     <i className="fas fa-microphone-slash" />
                   ) : (
-                    <i className="fas fa-microphone" />
+                    <i
+                      className={cx(
+                        'fas fa-microphone',
+                        { 'active-speaker': rosterAttendee.active },
+                        {
+                          'weak-signal':
+                            rosterAttendee.signalStrength &&
+                            rosterAttendee.signalStrength < 50
+                        }
+                      )}
+                    />
                   )}
                 </div>
               )}

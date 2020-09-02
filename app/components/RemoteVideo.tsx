@@ -19,6 +19,7 @@ type Props = {
   size: Size;
   attendeeId: string | null;
   raisedHand?: boolean;
+  activeSpeaker?: boolean;
   isContentShareEnabled: boolean;
 };
 
@@ -31,6 +32,7 @@ export default function RemoteVideo(props: Props) {
     size = Size.Large,
     attendeeId,
     raisedHand,
+    activeSpeaker,
     isContentShareEnabled
   } = props;
   return (
@@ -38,7 +40,8 @@ export default function RemoteVideo(props: Props) {
       className={cx('remoteVideo', {
         roomMode: viewMode === ViewMode.Room,
         screenShareMode: viewMode === ViewMode.ScreenShare,
-        enabled
+        enabled,
+        activeSpeaker
       })}
     >
       <video muted ref={videoElementRef} className={styles.video} />

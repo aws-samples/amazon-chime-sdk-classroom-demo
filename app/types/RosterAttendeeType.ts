@@ -6,6 +6,7 @@ type RosterAttendeeType = {
   muted?: boolean;
   signalStrength?: number;
   volume?: number;
+  active?: boolean;
 };
 
 export default RosterAttendeeType;
