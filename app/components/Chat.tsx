@@ -4,41 +4,39 @@
 import classNames from 'classnames/bind';
 import moment from 'moment';
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import { DataMessage } from 'amazon-chime-sdk-js';
 
 import ChimeSdkWrapper from '../chime/ChimeSdkWrapper';
 import getChimeContext from '../context/getChimeContext';
-import MessageType from '../types/MessageType';
 import styles from './Chat.css';
 import ChatInput from './ChatInput';
+import MessageTopic from '../enums/MessageTopic';
 
 const cx = classNames.bind(styles);
 
 export default function Chat() {
   const chime: ChimeSdkWrapper | null = useContext(getChimeContext());
-  const [messages, setMessages] = useState<MessageType[]>([]);
+  const [messages, setMessages] = useState<DataMessage[]>([]);
   const bottomElement = useRef(null);
 
   useEffect(() => {
-    const joinRoomMessaging = async () => {
-      await chime?.joinRoomMessaging();
+    const realTimeMessages: DataMessage[] = [];
+    const callback = (message: DataMessage) => {
+      realTimeMessages.push(message);
+      setMessages(realTimeMessages.slice() as DataMessage[]);
     };
-    joinRoomMessaging();
-  }, []);
 
-  useEffect(() => {
-    const realTimeMessages: MessageType[] = [];
-    const callback = (message: MessageType) => {
-      if (
-        message.name &&
-        (message.type === 'chat-message' || message.type === 'raise-hand')
-      ) {
-        realTimeMessages.push(message);
-        setMessages(realTimeMessages.slice() as MessageType[]);
-      }
+    const chatMessageUpdateCallback = { topic: MessageTopic.Chat, callback };
+    const raiseHandMessageUpdateCallback = {
+      topic: MessageTopic.RaiseHand,
+      callback
     };
-    chime?.subscribeToMessageUpdate(callback);
+
+    chime?.subscribeToMessageUpdate(chatMessageUpdateCallback);
+    chime?.subscribeToMessageUpdate(raiseHandMessageUpdateCallback);
     return () => {
-      chime?.unsubscribeFromMessageUpdate(callback);
+      chime?.unsubscribeFromMessageUpdate(chatMessageUpdateCallback);
+      chime?.unsubscribeFromMessageUpdate(raiseHandMessageUpdateCallback);
     };
   }, []);
 
@@ -55,9 +53,9 @@ export default function Chat() {
       <div className={cx('messages')}>
         {messages.map(message => {
           let messageString;
-          if (message.type === 'chat-message') {
-            messageString = message.payload.message;
-          } else if (message.type === 'raise-hand') {
+          if (message.topic === MessageTopic.Chat) {
+            messageString = message.text();
+          } else if (message.topic === MessageTopic.RaiseHand) {
             messageString = `✋`;
           }
 
@@ -65,11 +63,13 @@ export default function Chat() {
             <div
               key={message.timestampMs}
               className={cx('messageWrapper', {
-                raiseHand: message.type === 'raise-hand'
+                raiseHand: message.topic === MessageTopic.RaiseHand
               })}
             >
               <div className={cx('senderWrapper')}>
-                <div className={cx('senderName')}>{message.name}</div>
+                <div className={cx('senderName')}>
+                  {chime?.roster[message.senderAttendeeId].name}
+                </div>
                 <div className={cx('date')}>
                   {moment(message.timestampMs).format('h:mm A')}
                 </div>

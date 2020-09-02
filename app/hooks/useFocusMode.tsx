@@ -3,33 +3,33 @@
 
 import { useContext, useEffect, useState } from 'react';
 
+import { DataMessage } from 'amazon-chime-sdk-js';
 import ChimeSdkWrapper from '../chime/ChimeSdkWrapper';
 import getChimeContext from '../context/getChimeContext';
 import getUIStateContext from '../context/getUIStateContext';
 import ClassMode from '../enums/ClassMode';
-import MessageType from '../types/MessageType';
+import MessageTopic from '../enums/MessageTopic';
 
 export default function useFocusMode() {
   const chime: ChimeSdkWrapper | null = useContext(getChimeContext());
   const [focusMode, setFocusMode] = useState(false);
   const [state] = useContext(getUIStateContext());
   useEffect(() => {
-    const callback = (message: MessageType) => {
+    const callback = (message: DataMessage) => {
       if (state.classMode === ClassMode.Teacher) {
         return;
       }
-      const { type, payload } = message;
-      if (type === 'focus' && payload) {
-        chime?.audioVideo?.realtimeSetCanUnmuteLocalAudio(!payload.focus);
-        if (payload.focus === true) {
-          chime?.audioVideo?.realtimeMuteLocalAudio();
-        }
-        setFocusMode(!!payload.focus);
+      const { focus } = message.json();
+      chime?.audioVideo?.realtimeSetCanUnmuteLocalAudio(!focus);
+      if (focus) {
+        chime?.audioVideo?.realtimeMuteLocalAudio();
       }
+      setFocusMode(!!focus);
     };
-    chime?.subscribeToMessageUpdate(callback);
+    const focusMessageUpdateCallback = { topic: MessageTopic.Focus, callback };
+    chime?.subscribeToMessageUpdate(focusMessageUpdateCallback);
     return () => {
-      chime?.unsubscribeFromMessageUpdate(callback);
+      chime?.unsubscribeFromMessageUpdate(focusMessageUpdateCallback);
     };
   }, []);
   return focusMode;

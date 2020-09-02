@@ -2,15 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
+  AsyncScheduler,
   AudioVideoFacade,
   ConsoleLogger,
   DefaultDeviceController,
-  DefaultDOMWebSocketFactory,
+  DataMessage,
   DefaultMeetingSession,
   DefaultModality,
-  DefaultPromisedWebSocketFactory,
   DeviceChangeObserver,
-  FullJitterBackoff,
   LogLevel,
   MeetingSession,
   MeetingSessionConfiguration,
@@ -22,16 +21,16 @@ import throttle from 'lodash/throttle';
 
 import DeviceType from '../types/DeviceType';
 import FullDeviceInfoType from '../types/FullDeviceInfoType';
-import MessageType from '../types/MessageType';
+import MessageUpdateCallbackType from '../types/MessageUpdateCallbackType';
 import RegionType from '../types/RegionType';
 import RosterType from '../types/RosterType';
 import getBaseUrl from '../utils/getBaseUrl';
-import getMessagingWssUrl from '../utils/getMessagingWssUrl';
+import OptionalFeature from '../enums/OptionalFeature';
 
 export default class ChimeSdkWrapper implements DeviceChangeObserver {
   intl = useIntl();
 
-  private static WEB_SOCKET_TIMEOUT_MS = 10000;
+  private static DATA_MESSAGE_LIFETIME_MS = 10000;
 
   private static ROSTER_THROTTLE_MS = 400;
 
@@ -86,7 +85,7 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
 
   messagingSocket: ReconnectingPromisedWebSocket | null = null;
 
-  messageUpdateCallbacks: ((message: MessageType) => void)[] = [];
+  messageUpdateCallbacks: MessageUpdateCallbackType[] = [];
 
   initializeSdkWrapper = async () => {
     this.meetingSession = null;
@@ -140,7 +139,8 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
     title: string | null,
     name: string | null,
     region: string | null,
-    role: string | null
+    role: string | null,
+    optionalFeature: string | null
   ): Promise<void> => {
     if (!title || !name || !region || !role) {
       this.logError(
@@ -182,6 +182,10 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
       JoinInfo.Meeting,
       JoinInfo.Attendee
     );
+    if (optionalFeature === OptionalFeature.Simulcast) {
+      this.configuration.enableUnifiedPlanForChromiumBasedBrowsers = true;
+      this.configuration.enableSimulcastForUnifiedPlanChromiumBasedBrowsers = true;
+    }
     await this.initializeMeetingSession(this.configuration);
 
     this.title = title;
@@ -361,74 +365,29 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
     this.audioVideo?.start();
   };
 
-  joinRoomMessaging = async (): Promise<void> => {
-    if (!this.configuration) {
-      this.logError(new Error('configuration does not exist'));
-      return;
-    }
-
-    const messagingUrl = `${getMessagingWssUrl()}?MeetingId=${
-      this.configuration.meetingId
-    }&AttendeeId=${this.configuration.credentials?.attendeeId}&JoinToken=${
-      this.configuration.credentials?.joinToken
-    }`;
-    this.messagingSocket = new ReconnectingPromisedWebSocket(
-      messagingUrl,
-      [],
-      'arraybuffer',
-      new DefaultPromisedWebSocketFactory(new DefaultDOMWebSocketFactory()),
-      new FullJitterBackoff(1000, 0, 10000)
-    );
-
-    await this.messagingSocket.open(ChimeSdkWrapper.WEB_SOCKET_TIMEOUT_MS);
-
-    this.messagingSocket.addEventListener('message', (event: Event) => {
-      try {
-        const data = JSON.parse((event as MessageEvent).data);
-        const { attendeeId } = data.payload;
-
-        let name;
-        if (this.roster[attendeeId]) {
-          name = this.roster[attendeeId].name;
-        }
-
-        this.publishMessageUpdate({
-          type: data.type,
-          payload: data.payload,
-          timestampMs: Date.now(),
-          name
-        });
-      } catch (error) {
-        this.logError(error);
-      }
-    });
-  };
-
   // eslint-disable-next-line
-  sendMessage = (type: string, payload: any) => {
-    if (!this.messagingSocket) {
-      return;
-    }
-    const message = {
-      message: 'sendmessage',
-      data: JSON.stringify({ type, payload })
-    };
-    try {
-      this.messagingSocket.send(JSON.stringify(message));
-    } catch (error) {
-      this.logError(error);
-    }
+  sendMessage = (topic: string, data: any) => {
+    new AsyncScheduler().start(() => {
+      this.audioVideo?.realtimeSendDataMessage(
+        topic,
+        data,
+        ChimeSdkWrapper.DATA_MESSAGE_LIFETIME_MS
+      );
+      this.publishMessageUpdate(
+        new DataMessage(
+          Date.now(),
+          topic,
+          new TextEncoder().encode(data),
+          this.meetingSession?.configuration.credentials?.attendeeId || '',
+          this.meetingSession?.configuration.credentials?.externalUserId || ''
+        )
+      );
+    });
   };
 
   leaveRoom = async (end: boolean): Promise<void> => {
     try {
       this.audioVideo?.stop();
-    } catch (error) {
-      this.logError(error);
-    }
-
-    try {
-      await this.messagingSocket?.close(ChimeSdkWrapper.WEB_SOCKET_TIMEOUT_MS);
     } catch (error) {
       this.logError(error);
     }
@@ -608,21 +567,34 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
     }
   }, ChimeSdkWrapper.ROSTER_THROTTLE_MS);
 
-  subscribeToMessageUpdate = (callback: (message: MessageType) => void) => {
-    this.messageUpdateCallbacks.push(callback);
+  subscribeToMessageUpdate = (
+    messageUpdateCallback: MessageUpdateCallbackType
+  ) => {
+    this.messageUpdateCallbacks.push(messageUpdateCallback);
+    this.audioVideo?.realtimeSubscribeToReceiveDataMessage(
+      messageUpdateCallback.topic,
+      messageUpdateCallback.callback
+    );
   };
 
-  unsubscribeFromMessageUpdate = (callback: (message: MessageType) => void) => {
-    const index = this.messageUpdateCallbacks.indexOf(callback);
+  unsubscribeFromMessageUpdate = (
+    messageUpdateCallback: MessageUpdateCallbackType
+  ) => {
+    const index = this.messageUpdateCallbacks.indexOf(messageUpdateCallback);
     if (index !== -1) {
       this.messageUpdateCallbacks.splice(index, 1);
     }
+    this.audioVideo?.realtimeUnsubscribeFromReceiveDataMessage(
+      messageUpdateCallback.topic
+    );
   };
 
-  private publishMessageUpdate = (message: MessageType) => {
+  private publishMessageUpdate = (message: DataMessage) => {
     for (let i = 0; i < this.messageUpdateCallbacks.length; i += 1) {
-      const callback = this.messageUpdateCallbacks[i];
-      callback(message);
+      const messageUpdateCallback = this.messageUpdateCallbacks[i];
+      if (messageUpdateCallback.topic === message.topic) {
+        messageUpdateCallback.callback(message);
+      }
     }
   };
 

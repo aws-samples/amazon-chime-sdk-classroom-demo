@@ -47,7 +47,8 @@ export default function MeetingStatusProvider(props: Props) {
           query.get('title'),
           query.get('name'),
           query.get('region'),
-          state.classMode === ClassMode.Student ? 'student' : 'teacher'
+          state.classMode === ClassMode.Student ? 'student' : 'teacher',
+          query.get('optionalFeature')
         );
 
         setMeetingStatus({
