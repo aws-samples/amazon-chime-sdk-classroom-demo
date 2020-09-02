@@ -11,6 +11,7 @@ import getUIStateContext from '../context/getUIStateContext';
 import ClassMode from '../enums/ClassMode';
 import useFocusMode from '../hooks/useFocusMode';
 import styles from './ChatInput.css';
+import MessageTopic from '../enums/MessageTopic';
 
 const cx = classNames.bind(styles);
 
@@ -30,15 +31,14 @@ export default React.memo(function ChatInput() {
       return;
     }
 
-    chime?.sendMessage(raised ? 'raise-hand' : 'dismiss-hand', {
+    chime?.sendMessage(
+      raised ? MessageTopic.RaiseHand : MessageTopic.DismissHand,
       attendeeId
-    });
+    );
 
     if (raised) {
       timeoutId = window.setTimeout(() => {
-        chime?.sendMessage('dismiss-hand', {
-          attendeeId
-        });
+        chime?.sendMessage(MessageTopic.DismissHand, attendeeId);
         setRaised(false);
       }, 10000);
     } else {
@@ -69,10 +69,7 @@ export default React.memo(function ChatInput() {
               const sendingMessage = inputText.trim();
               const attendeeId = chime?.configuration?.credentials?.attendeeId;
               if (sendingMessage !== '' && attendeeId) {
-                chime?.sendMessage('chat-message', {
-                  attendeeId,
-                  message: sendingMessage
-                });
+                chime?.sendMessage(MessageTopic.Chat, sendingMessage);
                 setInputText('');
               }
             }

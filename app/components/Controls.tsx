@@ -14,6 +14,7 @@ import ClassMode from '../enums/ClassMode';
 import ViewMode from '../enums/ViewMode';
 import styles from './Controls.css';
 import Tooltip from './Tooltip';
+import MessageTopic from '../enums/MessageTopic';
 
 const cx = classNames.bind(styles);
 
@@ -79,13 +80,13 @@ export default function Controls(props: Props) {
             })}
             onClick={() => {
               const newFocusState = !focus;
-              chime?.sendMessage('focus', { focus: newFocusState });
-              chime?.sendMessage('chat-message', {
-                attendeeId: chime?.configuration?.credentials?.attendeeId,
-                message: newFocusState
+              chime?.sendMessage(MessageTopic.Focus, { focus: newFocusState });
+              chime?.sendMessage(
+                MessageTopic.Chat,
+                newFocusState
                   ? intl.formatMessage({ id: 'Controls.focusOnMessage' })
                   : intl.formatMessage({ id: 'Controls.focusOffMessage' })
-              });
+              );
               setFocus(newFocusState);
             }}
           >

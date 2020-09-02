@@ -1699,6 +1699,11 @@
   resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.5.tgz#b14efa8852b7768d898906613c23f688713e02cd"
   integrity sha512-Q1y515GcOdTHgagaVFhHnIFQ38ygs/kmxdNpvpou+raI9UO3YZcHDngBSYKQklcKlvA7iuQlmIKbzvmxcOE9CQ==
 
+"@types/dom-mediacapture-record@^1.0.4":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@types/dom-mediacapture-record/-/dom-mediacapture-record-1.0.7.tgz#08bacca4296ef521d59049f43e65cf971bbf6be1"
+  integrity sha512-ddDIRTO1ajtbxaNo2o7fPJggpN54PZf1ZUJKOjto2ENMJE/9GKUvaw3ZRuQzlS/p0E+PnIcssxfoqYJ4yiXSBw==
+
 "@types/enzyme-adapter-react-16@^1.0.6":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@types/enzyme-adapter-react-16/-/enzyme-adapter-react-16-1.0.6.tgz#8aca7ae2fd6c7137d869b6616e696d21bb8b0cec"
@@ -2347,11 +2352,12 @@ alphanum-sort@^1.0.0:
   resolved "https://registry.yarnpkg.com/alphanum-sort/-/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
   integrity sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM=
 
-amazon-chime-sdk-js@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/amazon-chime-sdk-js/-/amazon-chime-sdk-js-1.2.1.tgz#6a58d9018c01f9c9b29cced682966cd977d90304"
-  integrity sha512-JRAKadZfACLlyIklI7p/Oez41piqr9pwe2K7rIzyKKCkgHUraVpUdwGZau8NrOyie2cTWjmZ/HrIxRUCRwUZPw==
+amazon-chime-sdk-js@^1.16.0:
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/amazon-chime-sdk-js/-/amazon-chime-sdk-js-1.16.0.tgz#e2ffa36366079c27be378a6d589437a1f77d79d2"
+  integrity sha512-6RYsU9IHX7BxFVIhonBaSPBXpAgUxTzKQBwbl4K4QZ8hKDtpLeRp1ZaNU1i+9aL8KIunLazyv7euy7tdJdO/1g==
   dependencies:
+    "@types/dom-mediacapture-record" "^1.0.4"
     detect-browser "^4.7.0"
     protobufjs "~6.8.8"
     resize-observer "^1.0.0"
