@@ -14,7 +14,8 @@ import {
   LogLevel,
   MeetingSession,
   MeetingSessionConfiguration,
-  ReconnectingPromisedWebSocket
+  ReconnectingPromisedWebSocket,
+  DefaultActiveSpeakerPolicy
 } from 'amazon-chime-sdk-js';
 import { useIntl } from 'react-intl';
 import throttle from 'lodash/throttle';
@@ -293,6 +294,23 @@ export default class ChimeSdkWrapper implements DeviceChangeObserver {
             this.publishRosterUpdate();
           }
         );
+      }
+    );
+
+    this.audioVideo.subscribeToActiveSpeakerDetector(
+      new DefaultActiveSpeakerPolicy(),
+      (attendeeIds: string[]): void => {
+        Object.keys(this.roster).forEach(attendeeId => {
+          this.roster[attendeeId].active = false;
+        });
+
+        attendeeIds.some(attendeeId => {
+          if (this.roster[attendeeId]) {
+            this.roster[attendeeId].active = true;
+            return true; // only show the most active speaker
+          }
+          return false;
+        });
       }
     );
   };

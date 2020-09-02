@@ -37,6 +37,14 @@
   text-overflow: ellipsis;
 }
 
+.weak-signal {
+  color: var(--color_thunderbird);
+}
+
+.active-speaker {
+  color: var(--color_green);
+}
+
 .raisedHand {
   font-size: 1.3rem;
   margin-left: 0.5rem;
