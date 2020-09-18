@@ -41,6 +41,17 @@ At the end of the script you will see a URL to a download page. Save this link.
 
 ### Option 2: Deploy from your local machine
 
+#### Prerequisites
+To deploy the classroom demo you will need:
+
+- Node 10 or higher
+- npm 6.11 or higher
+
+And install aws and sam command line tools:
+
+* [Install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv1.html)
+* [Install the AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+
 First deploy the stack:
 
 ```bash
