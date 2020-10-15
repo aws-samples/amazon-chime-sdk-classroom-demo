@@ -69,3 +69,9 @@ Before pushing your commit, ensure that the application works okay in production
 ```bash
 yarn cross-env DEBUG_PROD=true yarn start
 ```
+
+## Troubleshooting
+
+### I get "The application ... can't be opened" when opening the app
+
+The default zipping tool on MacOS Catalina may incorrectly unzip the package. Download an alternative (such as "The Unarchiver"), and unzip the package by right clicking and selecting "Open as". You may also need to adjust your security & privacy settings if you get an "unidentified developer" message.
