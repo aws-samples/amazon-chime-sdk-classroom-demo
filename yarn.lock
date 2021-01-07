@@ -21,8 +21,8 @@
     "@aws-amplify/core" "^2.3.0"
     uuid "^3.2.1"
 
-"@aws-amplify/api@^2.2.1":
-  version "2.2.1"
+"@aws-amplify/api@^3.2.16":
+  version "3.2.16"
   resolved "https://registry.yarnpkg.com/@aws-amplify/api/-/api-2.2.1.tgz#a4dcd530d9a27a1e42d5fd5f5828d477c5afa9de"
   integrity sha512-1c7Gb1TO9NYETQmpDZV6TP+fcsZMBu/dDpWRM26Hb2huWqoIPKjE/nBfQl1egymy5CfZFivWYlCI+Y92jpQ2oA==
   dependencies:
