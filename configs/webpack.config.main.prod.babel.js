@@ -15,8 +15,15 @@ import baseConfig from './webpack.config.base';
 CheckNodeEnv('production');
 DeleteSourceMaps();
 
+const devtoolsConfig =
+  process.env.DEBUG_PROD === 'true'
+    ? {
+        devtool: 'source-map'
+      }
+    : {};
+
 export default merge.smart(baseConfig, {
-  devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
+  ...devtoolsConfig,
 
   mode: 'production',
 
@@ -34,9 +41,7 @@ export default merge.smart(baseConfig, {
       ? []
       : [
           new TerserPlugin({
-            parallel: true,
-            sourceMap: true,
-            cache: true
+            parallel: true
           })
         ]
   },

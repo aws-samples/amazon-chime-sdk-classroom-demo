@@ -3,7 +3,7 @@
  */
 
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
+import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import path from 'path';
 import TerserPlugin from 'terser-webpack-plugin';
 import webpack from 'webpack';
@@ -17,8 +17,15 @@ import baseConfig from './webpack.config.base';
 CheckNodeEnv('production');
 DeleteSourceMaps();
 
+const devtoolsConfig =
+  process.env.DEBUG_PROD === 'true'
+    ? {
+        devtool: 'source-map'
+      }
+    : {};
+
 export default merge.smart(baseConfig, {
-  devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
+  ...devtoolsConfig,
 
   mode: 'production',
 
@@ -179,18 +186,9 @@ export default merge.smart(baseConfig, {
       ? []
       : [
           new TerserPlugin({
-            parallel: true,
-            sourceMap: true,
-            cache: true
+            parallel: true
           }),
-          new OptimizeCSSAssetsPlugin({
-            cssProcessorOptions: {
-              map: {
-                inline: false,
-                annotation: true
-              }
-            }
-          })
+          new CssMinimizerPlugin()
         ]
   },
 
