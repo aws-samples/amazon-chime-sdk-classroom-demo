@@ -3,13 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/*
- * @NOTE: Prepend a `~` to css file paths that are in your node_modules
- *        See https://github.com/webpack-contrib/sass-loader#imports
- */
-@import '~@fortawesome/fontawesome-free/css/all.css';
-@import '~rc-tooltip/assets/bootstrap.css';
-@import '~react-dropdown/style.css';
+@import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
+@import '../node_modules/rc-tooltip/assets/bootstrap.css';
+@import '../node_modules/react-dropdown/style.css';
 
 :root {
   --local_video_container_height: 150px;

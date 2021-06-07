@@ -9,7 +9,6 @@ import chalk from 'chalk';
 import { execSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { TypedCssModulesPlugin } from 'typed-css-modules-webpack-plugin';
 import webpack from 'webpack';
 import merge from 'webpack-merge';
 
@@ -121,6 +120,9 @@ export default merge.smart(baseConfig, {
             loader: 'style-loader'
           },
           {
+            loader: '@teamsupercell/typings-for-css-modules-loader'
+          },
+          {
             loader: 'css-loader',
             options: {
               modules: {
@@ -207,10 +209,6 @@ export default merge.smart(baseConfig, {
 
     new webpack.HotModuleReplacementPlugin({
       multiStep: true
-    }),
-
-    new TypedCssModulesPlugin({
-      globPattern: 'app/**/*.{css,scss,sass}'
     }),
 
     new webpack.NoEmitOnErrorsPlugin(),
