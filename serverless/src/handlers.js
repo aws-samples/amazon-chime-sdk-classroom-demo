@@ -84,15 +84,6 @@ const putAttendee = async(title, attendeeId, name) => {
   }).promise();
 }
 
-function getNotificationsConfig() {
-  if (provideQueueArn) {
-    return  {
-      SqsQueueArn: sqsQueueArn,
-    };
-  }
-  return {}
-}
-
 function simplifyTitle(title) {
   // Strip out most symbolic characters and whitespace and make case insensitive,
   // but preserve any Unicode characters outside of the ASCII range.
@@ -121,7 +112,6 @@ exports.createMeeting = async(event, context, callback) => {
     const request = {
       ClientRequestToken: uuid(),
       MediaRegion: region,
-      NotificationsConfiguration: getNotificationsConfig(),
     };
     console.info('Creating new meeting: ' + JSON.stringify(request));
     meetingInfo = await chime.createMeeting(request).promise();
@@ -162,7 +152,6 @@ exports.join = async(event, context, callback) => {
     const request = {
       ClientRequestToken: uuid(),
       MediaRegion: region,
-      NotificationsConfiguration: getNotificationsConfig(),
     };
     console.info('Creating new meeting: ' + JSON.stringify(request));
     meetingInfo = await chime.createMeeting(request).promise();

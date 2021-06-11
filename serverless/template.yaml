@@ -1,24 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: Amazon Chime SDK Meeting Demo
-Parameters:
-  UseEventBridge:
-    Description: Use EventBridge to process server side notifications
-    Default: false
-    Type: String
-    AllowedValues: [true, false]
-Conditions:
-  ShouldUseEventBridge: !Equals [true, !Ref UseEventBridge]
+Description: Amazon Chime SDK Classroom Demo
 Globals:
   Function:
-    Runtime: nodejs12.x
+    Runtime: nodejs14.x
     Timeout: 30
     MemorySize: 128
     Environment:
       Variables:
         MEETINGS_TABLE_NAME: !Ref Meetings
         ATTENDEES_TABLE_NAME: !Ref Attendees
-        SQS_QUEUE_ARN: !GetAtt MeetingNotificationsQueue.Arn
         CONNECTIONS_TABLE_NAME: !Ref ConnectionsTable
         MESSAGING_WSS_URL: !Join ['', ['wss://', !Ref WebSocketMessagingApi, '.execute-api.', !Ref 'AWS::Region','.amazonaws.com/Prod']]
 Resources:
@@ -86,13 +77,10 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: "5"
         WriteCapacityUnits: "5"
-  MeetingNotificationsQueue:
-    Type: AWS::SQS::Queue
   ChimeSdkIndexLambda:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: index.handler
-      Runtime: nodejs14.x
       CodeUri: src/
       Events:
         Api1:
@@ -108,9 +96,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Meetings
-      Environment:
-        Variables:
-          USE_EVENT_BRIDGE: !Ref UseEventBridge
       Events:
         Api1:
           Type: Api
@@ -127,9 +112,6 @@ Resources:
             TableName: !Ref Meetings
         - DynamoDBCrudPolicy:
             TableName: !Ref Attendees
-      Environment:
-        Variables:
-          USE_EVENT_BRIDGE: !Ref UseEventBridge
       Events:
         Api1:
           Type: Api
@@ -166,48 +148,6 @@ Resources:
           Properties:
             Path: /attendee
             Method: GET
-  ChimeSQSQueueLambda:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: notification_handlers.sqs_handler
-      CodeUri: src/
-      Events:
-        MeetingNotificaionsEvent:
-          Type: SQS
-          Properties:
-            Queue: !GetAtt MeetingNotificationsQueue.Arn
-            BatchSize: 10
-  ChimeEventBridgeLambda:
-    Type: AWS::Serverless::Function
-    Condition: ShouldUseEventBridge
-    Properties:
-      Handler: notification_handlers.event_bridge_handler
-      CodeUri: src/
-      Events:
-        ChimeEventBridgeEvent:
-          Type: CloudWatchEvent
-          Properties:
-            Pattern:
-              source:
-                - aws.chime
-              detail-type:
-                - "Chime Meeting State Change"
-  ChimeNotificationsQueuePolicy:
-    Type: AWS::SQS::QueuePolicy
-    Properties:
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - sqs:SendMessage
-              - sqs:GetQueueUrl
-            Principal:
-              Service:
-                - chime.amazonaws.com
-            Resource: !GetAtt MeetingNotificationsQueue.Arn
-      Queues:
-        - Ref: MeetingNotificationsQueue
 
 # Messaging API
 
