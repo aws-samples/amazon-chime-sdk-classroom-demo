@@ -8,8 +8,6 @@ const oneDayFromNow = Math.floor(Date.now() / 1000) + 60 * 60 * 24;
 // Read resource names from the environment
 const meetingsTableName = process.env.MEETINGS_TABLE_NAME;
 const attendeesTableName = process.env.ATTENDEES_TABLE_NAME;
-const sqsQueueArn = process.env.SQS_QUEUE_ARN;
-const provideQueueArn = process.env.USE_EVENT_BRIDGE === 'false';
 
 function uuid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
