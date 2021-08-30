@@ -206,11 +206,6 @@ export default merge.smart(baseConfig, {
           manifest: require(manifest),
           sourceType: 'var'
         }),
-
-    new webpack.HotModuleReplacementPlugin({
-      multiStep: true
-    }),
-
     new webpack.NoEmitOnErrorsPlugin(),
 
     /**
@@ -241,25 +236,25 @@ export default merge.smart(baseConfig, {
 
   devServer: {
     port,
-    publicPath,
-    compress: true,
-    noInfo: true,
-    stats: 'errors-only',
-    inline: true,
-    lazy: false,
     hot: true,
     headers: { 'Access-Control-Allow-Origin': '*' },
-    contentBase: path.join(__dirname, 'dist'),
-    watchOptions: {
-      aggregateTimeout: 300,
-      ignored: /node_modules/,
-      poll: 100
+    static: {
+      directory: path.join(__dirname, 'dist'),
+      watch: {
+        aggregateTimeout: 300,
+        ignored: /node_modules/,
+        poll: 100
+      }
     },
     historyApiFallback: {
       verbose: true,
       disableDotRule: false
     },
-    before() {
+    devMiddleware: {
+      publicPath,
+      stats: 'errors-only'
+    },
+    onBeforeSetupMiddleware() {
       if (process.env.START_HOT) {
         console.log('Starting Main Process...');
         spawn('npm', ['run', 'start-main-dev'], {
