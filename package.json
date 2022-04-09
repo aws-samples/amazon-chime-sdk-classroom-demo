@@ -255,7 +255,7 @@
     "electron-updater": "^4.2.0",
     "history": "^4.10.1",
     "lodash": "^4.17.21",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "rc-tooltip": "^5.1.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
