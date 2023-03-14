@@ -234,7 +234,7 @@
     "terser-webpack-plugin": "^5.1.1",
     "typescript": "^3.7.5",
     "url-loader": "^3.0.0",
-    "webpack": "^5.38.1",
+    "webpack": "^5.76.0",
     "webpack-bundle-analyzer": "^4.6.1",
     "webpack-cli": "^4.6.0",
     "webpack-dev-server": "^4.0.0",
