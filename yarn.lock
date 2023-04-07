@@ -1032,9 +1032,9 @@
   version "0.5.3"
   resolved "https://registry.npmjs.org/@discoveryjs/json-ext/-/json-ext-0.5.3.tgz"
 
-"@electron/get@^1.0.1":
+"@electron/get@^1.13.0":
   version "1.14.1"
-  resolved "https://registry.npmjs.org/@electron/get/-/get-1.14.1.tgz"
+  resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.14.1.tgz#16ba75f02dffb74c23965e72d617adc721d27f40"
   dependencies:
     debug "^4.1.1"
     env-paths "^2.2.0"
@@ -1669,13 +1669,17 @@
   version "0.7.31"
   resolved "https://registry.npmjs.org/@types/ms/-/ms-0.7.31.tgz"
 
-"@types/node@*", "@types/node@^12", "@types/node@^12.0.12":
-  version "12.12.55"
-  resolved "https://registry.npmjs.org/@types/node/-/node-12.12.55.tgz"
+"@types/node@*", "@types/node@^16.11.26":
+  version "16.18.23"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.23.tgz#b6e934fe427eb7081d0015aad070acb3373c3c90"
 
 "@types/node@^10.1.0":
   version "10.17.50"
   resolved "https://registry.npmjs.org/@types/node/-/node-10.17.50.tgz"
+
+"@types/node@^12":
+  version "12.12.55"
+  resolved "https://registry.npmjs.org/@types/node/-/node-12.12.55.tgz"
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -4152,12 +4156,12 @@ electron-updater@^4.2.0:
     lodash.isequal "^4.5.0"
     semver "^7.3.2"
 
-electron@11.5.0:
-  version "11.5.0"
-  resolved "https://registry.npmjs.org/electron/-/electron-11.5.0.tgz"
+electron@18.3.7:
+  version "18.3.7"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-18.3.7.tgz#a22a23d63811d067c8e33abc5674122408319265"
   dependencies:
-    "@electron/get" "^1.0.1"
-    "@types/node" "^12.0.12"
+    "@electron/get" "^1.13.0"
+    "@types/node" "^16.11.26"
     extract-zip "^1.0.3"
 
 elliptic@^6.5.3:
